@@ -22,6 +22,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometerSensor;
     private Sensor gyroscopeSensor;
 
+    private String lightText;
+    private String proximityText;
+    private String accelerometerText;
+    private String gyroscopeText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,12 +37,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // initialize the sensors
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
         // declare and initialize the 4 different sensor buttons
         final ImageView lightToggle = findViewById(R.id.lightToggle);
         final ImageView proximityToggle = findViewById(R.id.proximityToggle);
         final ImageView accelerometerToggle = findViewById(R.id.accelerometerToggle);
         final ImageView gyroscopeToggle = findViewById(R.id.gyroscopeToggle);
+
+        // declare and initialize the text view
+        final TextView text = findViewById(R.id.textView);
 
         // light sensor
         if (sensorAvailable(Sensor.TYPE_LIGHT)) {
@@ -48,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     proximityToggle.setActivated(false);
                     accelerometerToggle.setActivated(false);
                     gyroscopeToggle.setActivated(false);
+
+                    text.setText(lightText);
                 }
             });
         } else {
@@ -72,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     proximityToggle.setActivated(!proximityToggle.isActivated());
                     accelerometerToggle.setActivated(false);
                     gyroscopeToggle.setActivated(false);
+
+                    text.setText(proximityText);
                 }
             });
         } else {
@@ -96,6 +111,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     proximityToggle.setActivated(false);
                     accelerometerToggle.setActivated(!accelerometerToggle.isActivated());
                     gyroscopeToggle.setActivated(false);
+
+                    text.setText(accelerometerText);
                 }
             });
         } else {
@@ -120,6 +137,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     proximityToggle.setActivated(false);
                     accelerometerToggle.setActivated(false);
                     gyroscopeToggle.setActivated(!gyroscopeToggle.isActivated());
+
+                    text.setText(gyroscopeText);
                 }
             });
         } else {
@@ -151,14 +170,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             float valueZ = event.values[0];
-            text.setText(valueZ + "");
+            lightText = valueZ + "";
         } else if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
             float distance = event.values[0];
-            text.setText(distance + "");
+            proximityText = distance + "";
         } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            // get the x,y,z values of the accelerometer
+            float valueX = event.values[0];
+            float valueY = event.values[1];
+            float valueZ = event.values[2];
 
+            // if the change is below 2, it is just plain noise
+            if (valueX < 2) {
+                valueX = 0;
+            }
+            if (valueY < 2) {
+                valueY = 0;
+            }
+            if (valueZ < 2) {
+                valueZ = 0;
+            }
+
+            accelerometerText = "X: " + valueX + "\nY: " + valueY + "\nZ: " + valueZ;
         } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            float valueX = event.values[0];
+            float valueY = event.values[1];
+            float valueZ = event.values[2];
 
+            gyroscopeText = "X: " + valueX + " rad/s\nY: " + valueY + " rad/s\nZ: " + valueZ + " rad/s";
         }
     }
 
@@ -170,10 +209,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        //sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
     @Override
     protected void onPause() {
