@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="90dp"
+        android:text="TextView" />
+
+    <ImageView
+        android:id="@+id/lightToggle"
+        android:layout_width="102dp"
+        android:layout_height="97dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        app:srcCompat="@drawable/selector_toggle_light_button" />
+
+    <ImageView
+        android:id="@+id/proximityToggle"
+        android:layout_width="102dp"
+        android:layout_height="97dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/accelerometerToggle"
+        app:srcCompat="@drawable/selector_toggle_proximity_button" />
+
+    <ImageView
+        android:id="@+id/accelerometerToggle"
+        android:layout_width="103dp"
+        android:layout_height="97dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/gyroscopeToggle"
+        app:srcCompat="@drawable/selector_toggle_accelerometer_button" />
+
+    <ImageView
+        android:id="@+id/gyroscopeToggle"
+        android:layout_width="102dp"
+        android:layout_height="97dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        app:srcCompat="@drawable/selector_toggle_gyroscope_button" />
+
+</RelativeLayout>
