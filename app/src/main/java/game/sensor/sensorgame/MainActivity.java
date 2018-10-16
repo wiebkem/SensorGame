@@ -9,216 +9,141 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    private SensorManager sensorManager;
-    private Sensor lightSensor;
-    private Sensor proximitySensor;
-    private Sensor accelerometerSensor;
-    private Sensor gyroscopeSensor;
+    private SensorOrganizer sensorOrganizer;
+
+    private ImageView lightToggle;
+    private ImageView proximityToggle;
+    private ImageView accelerometerToggle;
+    private ImageView gyroscopeToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize the sensor manager
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorOrganizer = new SensorOrganizer((SensorManager) getSystemService(Context.SENSOR_SERVICE), (TextView) findViewById(R.id.textView));
 
-        // initialize the sensors
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        switchSensorsBasedOnClick();
+    }
 
+    private void switchSensorsBasedOnClick() {
         // declare and initialize the 4 different sensor buttons
-        final ImageView lightToggle = findViewById(R.id.lightToggle);
-        final ImageView proximityToggle = findViewById(R.id.proximityToggle);
-        final ImageView accelerometerToggle = findViewById(R.id.accelerometerToggle);
-        final ImageView gyroscopeToggle = findViewById(R.id.gyroscopeToggle);
+        lightToggle = findViewById(R.id.lightToggle);
+        proximityToggle = findViewById(R.id.proximityToggle);
+        accelerometerToggle = findViewById(R.id.accelerometerToggle);
+        gyroscopeToggle = findViewById(R.id.gyroscopeToggle);
 
         // light sensor
-        if (sensorAvailable(Sensor.TYPE_LIGHT)) {
+        if (sensorOrganizer.sensorAvailable(Sensor.TYPE_LIGHT)) {
             lightToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    deactivateToggles();
                     lightToggle.setActivated(!lightToggle.isActivated());
-                    proximityToggle.setActivated(false);
-                    accelerometerToggle.setActivated(false);
-                    gyroscopeToggle.setActivated(false);
 
-                    sensorManager.unregisterListener(MainActivity.this);
-                    sensorManager.registerListener(MainActivity.this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    unregisterSensorListener();
+                    registerSensorListener(sensorOrganizer.getLightSensor());
                 }
             });
         } else {
-            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
-            alertDialog.setTitle("Light error");
-            alertDialog.setMessage("The light is not available on your phone!");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            showAlertDialog("light");
         }
 
         // proximity sensor
-        if (sensorAvailable(Sensor.TYPE_PROXIMITY)) {
+        if (sensorOrganizer.sensorAvailable(Sensor.TYPE_PROXIMITY)) {
             proximityToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    lightToggle.setActivated(false);
+                    deactivateToggles();
                     proximityToggle.setActivated(!proximityToggle.isActivated());
-                    accelerometerToggle.setActivated(false);
-                    gyroscopeToggle.setActivated(false);
 
-                    sensorManager.unregisterListener(MainActivity.this);
-                    sensorManager.registerListener(MainActivity.this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    unregisterSensorListener();
+                    registerSensorListener(sensorOrganizer.getProximitySensor());
                 }
             });
         } else {
-            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
-            alertDialog.setTitle("Proximity error");
-            alertDialog.setMessage("The proximity is not available on your phone!");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            showAlertDialog("proximity");
         }
 
         // accelerometer sensor
-        if (sensorAvailable(Sensor.TYPE_ACCELEROMETER)) {
+        if (sensorOrganizer.sensorAvailable(Sensor.TYPE_ACCELEROMETER)) {
             accelerometerToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    lightToggle.setActivated(false);
-                    proximityToggle.setActivated(false);
+                    deactivateToggles();
                     accelerometerToggle.setActivated(!accelerometerToggle.isActivated());
-                    gyroscopeToggle.setActivated(false);
 
-                    sensorManager.unregisterListener(MainActivity.this);
-                    sensorManager.registerListener(MainActivity.this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    unregisterSensorListener();
+                    registerSensorListener(sensorOrganizer.getAccelerometerSensor());
                 }
             });
         } else {
-            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
-            alertDialog.setTitle("Accelerometer error");
-            alertDialog.setMessage("The accelerometer is not available on your phone!");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            showAlertDialog("accelerometer");
         }
 
         // gyroscope sensor
-        if (sensorAvailable(Sensor.TYPE_GYROSCOPE)) {
+        if (sensorOrganizer.sensorAvailable(Sensor.TYPE_GYROSCOPE)) {
             gyroscopeToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    lightToggle.setActivated(false);
-                    proximityToggle.setActivated(false);
-                    accelerometerToggle.setActivated(false);
+                    deactivateToggles();
                     gyroscopeToggle.setActivated(!gyroscopeToggle.isActivated());
 
-                    sensorManager.unregisterListener(MainActivity.this);
-                    sensorManager.registerListener(MainActivity.this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                    unregisterSensorListener();
+                    registerSensorListener(sensorOrganizer.getGyroscopeSensor());
                 }
             });
         } else {
-            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
-            alertDialog.setTitle("Gyroscope error");
-            alertDialog.setMessage("The gyroscope is not available on your phone!");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            showAlertDialog("gyroscope");
         }
     }
 
-    // check if the sensor is available
-    public boolean sensorAvailable(int sensorType) {
-        if (sensorManager.getDefaultSensor(sensorType) != null) {
-            return true;
-        } else {
-            return false;
-        }
+    private void deactivateToggles() {
+        lightToggle.setActivated(false);
+        proximityToggle.setActivated(false);
+        accelerometerToggle.setActivated(false);
+        gyroscopeToggle.setActivated(false);
+    }
+
+    private void showAlertDialog(String sensorName) {
+        AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage("The " + sensorName + " sensor is not available on your phone!");
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
+    private void unregisterSensorListener() {
+        sensorOrganizer.unregisterListener();
+    }
+
+    private void registerSensorListener(Sensor sensor) {
+        sensorOrganizer.registerListener(sensor);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterSensorListener();
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        TextView text = findViewById(R.id.textView);
-
-        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            float valueZ = event.values[0];
-
-            String lightText = valueZ + "";
-            text.setText(lightText);
-        } else if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-            float distance = event.values[0];
-
-            String proximityText = distance + "";
-            text.setText(proximityText);
-        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            // get the x,y,z values of the accelerometer
-            float valueX = event.values[0];
-            float valueY = event.values[1];
-            float valueZ = event.values[2];
-
-            // if the change is below 2, it is just plain noise
-            if (valueX < 2) {
-                valueX = 0;
-            }
-            if (valueY < 2) {
-                valueY = 0;
-            }
-            if (valueZ < 2) {
-                valueZ = 0;
-            }
-
-            String accelerometerText = "X: " + valueX + "\nY: " + valueY + "\nZ: " + valueZ;
-            text.setText(accelerometerText);
-        } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            float valueX = event.values[0];
-            float valueY = event.values[1];
-            float valueZ = event.values[2];
-
-            String gyroscopeText = "X: " + valueX + " rad/s\nY: " + valueY + " rad/s\nZ: " + valueZ + " rad/s";
-            text.setText(gyroscopeText);
-        }
+        sensorOrganizer.onSensorChanged(event);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        sensorManager.unregisterListener(this);
     }
 }
