@@ -4,9 +4,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.widget.TextView;
 
 public class SensorOrganizer implements SensorEventListener {
+    private Mood currentMood;
+    private ChangeListener listener;
+
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private Sensor proximitySensor;
@@ -17,6 +21,8 @@ public class SensorOrganizer implements SensorEventListener {
     public SensorOrganizer(SensorManager sensorManager, TextView textView) {
         // initialize the sensor manager
         this.sensorManager = sensorManager;
+
+        setCurrentMood(Mood.SAD);
 
         // initialize the sensors
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -49,8 +55,20 @@ public class SensorOrganizer implements SensorEventListener {
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             float valueZ = event.values[0];
 
+            Log.d("currentMood", "value Z for current mood: " + valueZ);
+            if (valueZ < 40 && currentMood != Mood.SAD) {
+                setCurrentMood(Mood.SAD);
+            } else if (valueZ < 100 && currentMood != Mood.NEUTRAL) {
+                setCurrentMood(Mood.NEUTRAL);
+            } else if (valueZ < 250 && currentMood != Mood.SMILE) {
+                setCurrentMood(Mood.SMILE);
+            } else if (currentMood != Mood.DANCE){
+                setCurrentMood(Mood.DANCE);
+            }
+
             String lightText = valueZ + "";
             text.setText(lightText);
+            Log.d("currentMood", lightText);
         } else if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
             float distance = event.values[0];
 
@@ -106,5 +124,28 @@ public class SensorOrganizer implements SensorEventListener {
 
     public Sensor getGyroscopeSensor() {
         return gyroscopeSensor;
+    }
+
+    // generated getter and setter for the mood
+    public void setCurrentMood(Mood currentMood) {
+        this.currentMood = currentMood;
+        if (listener != null) listener.onChange();
+    }
+
+    public Mood getCurrentMood() {
+        return currentMood;
+    }
+
+    // created the methods for the change listener for the mood
+    public ChangeListener getListener() {
+        return listener;
+    }
+
+    public void setListener(ChangeListener listener) {
+        this.listener = listener;
+    }
+
+    public interface ChangeListener {
+        void onChange();
     }
 }
