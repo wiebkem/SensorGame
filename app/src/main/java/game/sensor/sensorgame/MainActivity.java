@@ -3,18 +3,20 @@ package game.sensor.sensorgame;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+import pl.droidsonroids.gif.GifImageView;
+
+public class MainActivity extends AppCompatActivity {
     private SensorOrganizer sensorOrganizer;
+    private SoundOrganizer soundOrganizer;
 
     private ImageView lightToggle;
     private ImageView proximityToggle;
@@ -26,7 +28,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final GifImageView gifView = findViewById(R.id.dollImage);
+        gifView.setImageResource(R.drawable.sad);
+
         sensorOrganizer = new SensorOrganizer((SensorManager) getSystemService(Context.SENSOR_SERVICE), (TextView) findViewById(R.id.textView));
+        soundOrganizer = new SoundOrganizer(this);
+
+        sensorOrganizer.setListener(new SensorOrganizer.ChangeListener() {
+            @Override
+            public void onChange() {
+                Log.d("currentMood", "current Mood: " + sensorOrganizer.getCurrentMood());
+                soundOrganizer.changeSong(sensorOrganizer.getCurrentMood());
+
+                // switch the doll image
+                switch (sensorOrganizer.getCurrentMood()) {
+                    case SAD:
+                        gifView.setImageResource(R.drawable.sad);
+                        break;
+
+                    case NEUTRAL:
+                        gifView.setImageResource(R.drawable.neutral);
+                        break;
+
+                    case SMILE:
+                        gifView.setImageResource(R.drawable.smiling);
+                        break;
+
+                    case DANCE:
+                        gifView.setImageResource(R.drawable.dancing);
+                        break;
+
+                    default:
+                        gifView.setImageResource(R.drawable.sad);
+                        break;
+                }
+            }
+        });
 
         switchSensorsBasedOnClick();
     }
@@ -38,16 +75,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         accelerometerToggle = findViewById(R.id.accelerometerToggle);
         gyroscopeToggle = findViewById(R.id.gyroscopeToggle);
 
+        // switch on the light sensor for starting up the app
+        activateLightSensor();
+
         // light sensor
         if (sensorOrganizer.sensorAvailable(Sensor.TYPE_LIGHT)) {
             lightToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    deactivateToggles();
-                    lightToggle.setActivated(!lightToggle.isActivated());
-
-                    unregisterSensorListener();
-                    registerSensorListener(sensorOrganizer.getLightSensor());
+                    activateLightSensor();
                 }
             });
         } else {
@@ -103,6 +139,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    private void activateLightSensor() {
+        deactivateToggles();
+        lightToggle.setActivated(!lightToggle.isActivated());
+
+        unregisterSensorListener();
+        registerSensorListener(sensorOrganizer.getLightSensor());
+    }
+
     private void deactivateToggles() {
         lightToggle.setActivated(false);
         proximityToggle.setActivated(false);
@@ -132,18 +176,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        soundOrganizer.stopMediaPlayer();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         unregisterSensorListener();
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        sensorOrganizer.onSensorChanged(event);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 }
