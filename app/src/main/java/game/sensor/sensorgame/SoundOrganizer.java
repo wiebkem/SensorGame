@@ -2,12 +2,7 @@ package game.sensor.sensorgame;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.util.Log;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class SoundOrganizer {
     private MediaPlayer mediaPlayer;
@@ -15,11 +10,11 @@ public class SoundOrganizer {
 
     public SoundOrganizer(Context context) {
         this.context = context;
-        startMediaPlayer();
+        startMediaPlayer(R.raw.sad);
     }
 
-    public void startMediaPlayer() {
-        mediaPlayer = MediaPlayer.create(context, R.raw.sad);
+    public void startMediaPlayer(int songId) {
+        mediaPlayer = MediaPlayer.create(context, songId);
         mediaPlayer.setLooping(true);  // for repeating the song
         mediaPlayer.start();
     }
@@ -34,71 +29,31 @@ public class SoundOrganizer {
         switch (mood) {
             case SAD:
                 Log.d("currentMood", "change to SAD song");
-                mediaPlayer.reset();
-
-                try {
-                    mediaPlayer.setDataSource(context, Uri.parse("android.resource://raw/" + R.raw.sad));
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mediaPlayer.start();
+                stopMediaPlayer();
+                startMediaPlayer(R.raw.sad);
                 break;
 
             case NEUTRAL:
                 Log.d("currentMood", "change to NEUTRAL song");
-                mediaPlayer.reset();
-
-                try {
-                    mediaPlayer.setDataSource(context, Uri.parse("android.resource://raw/" + R.raw.neutral));
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mediaPlayer.start();
+                stopMediaPlayer();
+                startMediaPlayer(R.raw.neutral);
                 break;
 
             case SMILE:
                 Log.d("currentMood", "change to SMILE song");
-                mediaPlayer.reset();
-
-                try {
-                    mediaPlayer.setDataSource(context, Uri.parse("android.resource://raw/" + R.raw.smile));
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mediaPlayer.start();
+                stopMediaPlayer();
+                startMediaPlayer(R.raw.smile);
                 break;
 
             case DANCE:
                 Log.d("currentMood", "change to DANCE song");
-                mediaPlayer.reset();
-
-                try {
-                    mediaPlayer.setDataSource(context, Uri.parse("android.resource://raw/" + R.raw.dance));
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mediaPlayer.start();
+                stopMediaPlayer();
+                startMediaPlayer(R.raw.dance);
                 break;
 
             default:
-                mediaPlayer.reset();
-
-                try {
-                    mediaPlayer.setDataSource(context, Uri.parse("android.resource://raw/" + R.raw.sad));
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mediaPlayer.start();
+                stopMediaPlayer();
+                startMediaPlayer(R.raw.sad);
                 break;
         }
     }
