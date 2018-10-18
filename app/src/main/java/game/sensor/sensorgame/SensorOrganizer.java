@@ -55,14 +55,14 @@ public class SensorOrganizer implements SensorEventListener {
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             float valueZ = event.values[0];
 
-            Log.d("currentMood", "value Z for current mood: " + valueZ);
-            if (valueZ < 40 && currentMood != Mood.SAD) {
+            Log.d("currentMood", "value Z for current mood based on light: " + valueZ);
+            if (valueZ <= 100 && currentMood != Mood.SAD) {
                 setCurrentMood(Mood.SAD);
-            } else if (valueZ < 100 && currentMood != Mood.NEUTRAL) {
+            } else if (valueZ > 100 && valueZ <= 500 && currentMood != Mood.NEUTRAL) {
                 setCurrentMood(Mood.NEUTRAL);
-            } else if (valueZ < 250 && currentMood != Mood.SMILE) {
+            } else if (valueZ > 500 && valueZ <= 2000 && currentMood != Mood.SMILE) {
                 setCurrentMood(Mood.SMILE);
-            } else if (currentMood != Mood.DANCE){
+            } else if (valueZ > 2000 && currentMood != Mood.DANCE){
                 setCurrentMood(Mood.DANCE);
             }
 
@@ -71,6 +71,13 @@ public class SensorOrganizer implements SensorEventListener {
             Log.d("currentMood", lightText);
         } else if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
             float distance = event.values[0];
+
+            Log.d("currentMood", "distance for current mood based on proximity: " + distance);
+            if (distance <= 0 && currentMood != Mood.SAD) {
+                setCurrentMood(Mood.SAD);
+            } else if (distance > 0 && currentMood != Mood.DANCE){
+                setCurrentMood(Mood.DANCE);
+            }
 
             String proximityText = distance + "";
             text.setText(proximityText);
