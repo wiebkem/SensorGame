@@ -21,8 +21,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView lightToggle;
     private ImageView proximityToggle;
-    private ImageView accelerometerToggle;
-    private ImageView gyroscopeToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         final GifImageView gifView = findViewById(R.id.dollImage);
         gifView.setImageResource(R.drawable.sad);
 
-        sensorOrganizer = new SensorOrganizer((SensorManager) getSystemService(Context.SENSOR_SERVICE), (TextView) findViewById(R.id.textView));
+        sensorOrganizer = new SensorOrganizer((SensorManager) getSystemService(Context.SENSOR_SERVICE));
         soundOrganizer = new SoundOrganizer(this);
 
         sensorOrganizer.setListener(new SensorOrganizer.ChangeListener() {
@@ -76,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
         // declare and initialize the 4 different sensor buttons
         lightToggle = findViewById(R.id.lightToggle);
         proximityToggle = findViewById(R.id.proximityToggle);
-        accelerometerToggle = findViewById(R.id.accelerometerToggle);
-        gyroscopeToggle = findViewById(R.id.gyroscopeToggle);
 
         // switch on the light sensor for starting up the app
         activateLightSensor();
@@ -109,38 +105,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showAlertDialog("proximity");
         }
-
-        // accelerometer sensor
-        if (sensorOrganizer.sensorAvailable(Sensor.TYPE_ACCELEROMETER)) {
-            accelerometerToggle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    deactivateToggles();
-                    accelerometerToggle.setActivated(!accelerometerToggle.isActivated());
-
-                    unregisterSensorListener();
-                    registerSensorListener(sensorOrganizer.getAccelerometerSensor());
-                }
-            });
-        } else {
-            showAlertDialog("accelerometer");
-        }
-
-        // gyroscope sensor
-        if (sensorOrganizer.sensorAvailable(Sensor.TYPE_GYROSCOPE)) {
-            gyroscopeToggle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    deactivateToggles();
-                    gyroscopeToggle.setActivated(!gyroscopeToggle.isActivated());
-
-                    unregisterSensorListener();
-                    registerSensorListener(sensorOrganizer.getGyroscopeSensor());
-                }
-            });
-        } else {
-            showAlertDialog("gyroscope");
-        }
     }
 
     private void activateLightSensor() {
@@ -154,8 +118,6 @@ public class MainActivity extends AppCompatActivity {
     private void deactivateToggles() {
         lightToggle.setActivated(false);
         proximityToggle.setActivated(false);
-        accelerometerToggle.setActivated(false);
-        gyroscopeToggle.setActivated(false);
     }
 
     private void showAlertDialog(String sensorName) {

@@ -14,11 +14,8 @@ public class SensorOrganizer implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private Sensor proximitySensor;
-    private Sensor accelerometerSensor;
-    private Sensor gyroscopeSensor;
-    private TextView text;
 
-    public SensorOrganizer(SensorManager sensorManager, TextView textView) {
+    public SensorOrganizer(SensorManager sensorManager) {
         // initialize the sensor manager
         this.sensorManager = sensorManager;
 
@@ -27,10 +24,6 @@ public class SensorOrganizer implements SensorEventListener {
         // initialize the sensors
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-
-        this.text = textView;
     }
 
     // check if the sensor is available
@@ -65,48 +58,15 @@ public class SensorOrganizer implements SensorEventListener {
             } else if (valueZ > 2000 && currentMood != Mood.DANCE){
                 setCurrentMood(Mood.DANCE);
             }
-
-            String lightText = valueZ + "";
-            text.setText(lightText);
-            Log.d("currentMood", lightText);
         } else if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
             float distance = event.values[0];
 
             Log.d("currentMood", "distance for current mood based on proximity: " + distance);
-            if (distance <= 0 && currentMood != Mood.SAD) {
+            if (distance > 0 && currentMood != Mood.SAD) {
                 setCurrentMood(Mood.SAD);
-            } else if (distance > 0 && currentMood != Mood.DANCE){
+            } else if (distance <= 0 && currentMood != Mood.DANCE){
                 setCurrentMood(Mood.DANCE);
             }
-
-            String proximityText = distance + "";
-            text.setText(proximityText);
-        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            // get the x,y,z values of the accelerometer
-            float valueX = event.values[0];
-            float valueY = event.values[1];
-            float valueZ = event.values[2];
-
-            // if the change is below 2, it is just plain noise
-            if (valueX < 2) {
-                valueX = 0;
-            }
-            if (valueY < 2) {
-                valueY = 0;
-            }
-            if (valueZ < 2) {
-                valueZ = 0;
-            }
-
-            String accelerometerText = "X: " + valueX + "\nY: " + valueY + "\nZ: " + valueZ;
-            text.setText(accelerometerText);
-        } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            float valueX = event.values[0];
-            float valueY = event.values[1];
-            float valueZ = event.values[2];
-
-            String gyroscopeText = "X: " + valueX + " rad/s\nY: " + valueY + " rad/s\nZ: " + valueZ + " rad/s";
-            text.setText(gyroscopeText);
         }
     }
 
@@ -123,14 +83,6 @@ public class SensorOrganizer implements SensorEventListener {
 
     public Sensor getProximitySensor() {
         return proximitySensor;
-    }
-
-    public Sensor getAccelerometerSensor() {
-        return accelerometerSensor;
-    }
-
-    public Sensor getGyroscopeSensor() {
-        return gyroscopeSensor;
     }
 
     // generated getter and setter for the mood
